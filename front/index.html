@@ -1,0 +1,105 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IOT Project</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <label class="switch">
+        <input type="checkbox" id="toggle-slider">
+        <span class="slider"></span>
+    </label>
+    <div class="temperatura" style="display:flex; flex-direction:row">
+        <img src="slike/Thermometer_icon.png" style="width:15%; height:15%; margin-left:3%;">
+        <input id="temperatura"
+            style="width: 50%;height: 50px; border: 2px solid rgb(178, 191, 205); background-color: rgb(202, 226, 239);
+     border-radius: 30px; text-align: center; margin-top: 5%; margin-bottom:2%; color: black; font-weight: bold; font-size: 30px;box-shadow: rgba(88, 110, 155, 0.4) 0px 30px 90px; margin-left:20%; color:rgb(14, 13, 13); font-family: 'Courier New', Courier, monospace;"
+            disabled> </input>
+
+    </div>
+    <br> <br> <br> <br>
+    <img src="slike/kisobran.png" style="width:5%; height:10%; margin-left:10%; transform:rotate(10deg);">
+    <img src="slike/pahulja.png"
+        style="width:7%; height:13%; margin-left:60%; margin-top:-5%; transform:rotate(-10deg)">
+    <div class="vlaznost" style="display:flex; flex-direction:row">
+        <img src="slike/waterdrop.jpg" style="width:15%; height:10%; margin-left:3%; margin-top:2%;">
+
+        <input id="vlaznost"
+            style="width: 50%;height: 50px; border: 2px solid rgb(178, 191, 205); background-color: rgb(202, 226, 239);
+     border-radius: 30px; text-align: center; margin-top: 5%; margin-bottom:2%; color: black; font-weight: bold; font-size: 30px;box-shadow: rgba(76, 96, 135, 0.4) 0px 30px 90px; margin-left:20%; color:rgb(14, 13, 13); font-family: 'Courier New', Courier, monospace;"
+            disabled> </input>
+
+    </div>
+    <img src="slike/sunceoblak.png"
+        style="width:6%; height: 11%; margin-left:20%; margin-top:1%;transform:rotate(-10deg);">
+    <img src="slike/mjesec.png"
+        style="width:5%; height:10%; margin-right:20%; margin-left:40%; margin-top:1%;margin-bottom:-3%;transform:rotate(-15deg);">
+    <br><br><br>
+
+    <div class="slidecontainer" style="display:flex; flex-direction:row; justify-content: center;">
+        <input type="range" min="0" max="255" value="0" id="sliderZaVrijednost" >
+    </div>
+    
+
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { getDatabase, ref, child, update, set, get, onValue } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
+        const firebaseConfig = {
+            apiKey: "AIzaSyCZvg7_zlNiedVieMFJxPPs20Y4hem2vYM",
+            authDomain: "iotadis.firebaseapp.com",
+            databaseURL: "https://iotadis-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "iotadis",
+            storageBucket: "iotadis.appspot.com",
+            messagingSenderId: "537181789445",
+            appId: "1:537181789445:web:e0c5b5d10e74ab96ab2b6c"
+        };
+        //   const analytics = getAnalytics(app);
+        const app = initializeApp(firebaseConfig);
+        const inputTemperatura = document.getElementById("temperatura");
+        const inputVlaznost = document.getElementById("vlaznost");
+        const db = getDatabase();
+        const toggleSlider = document.getElementById('toggle-slider');
+        const slidert = document.getElementById("sliderZaVrijednost");
+        const mjera = ref(db, 'mjerenja');
+
+        onValue(mjera, (vrijednost) => {
+            inputTemperatura.value = vrijednost.val().temperatura + " °C";
+            inputVlaznost.value = vrijednost.val().vlaznost + "%";
+        })
+
+
+        toggleSlider.addEventListener('change', function () {
+            if (this.checked) {
+                set(ref(db, 'mjerenja/jelUpaljeno'), true)
+                    .then(() => {
+                        console.log('palim uredjaj.....');
+                    })
+            } else {
+                set(ref(db, 'mjerenja/jelUpaljeno'), false)
+                    .then(() => {
+                        console.log('gasim uredjaj.....');
+                    })
+            }
+        });
+
+        function promijeniVrijednost(){
+           set(ref(db,'mjerenja/sliderVrijednost'),parseInt(slidert.value))
+           .then(()=>{
+            console.log('poslata vrijednost ' + slidert.value);
+           })
+           .catch((error)=>{
+            console.log('error ' + error);
+           })
+        }
+
+
+        slidert.addEventListener('input',promijeniVrijednost);
+    </script>
+</body>
+
+</html>
